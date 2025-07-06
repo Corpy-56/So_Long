@@ -1,47 +1,60 @@
-NAME = libft.a
 
-SRC_DIR = ./src/
-INC_DIR = ./includes/
-OBJ_DIR = ./objects/
+NAME = so_long
 
-SRCS =   ft_isalpha.c ft_isdigit.c ft_isalnum.c ft_isascii.c ft_isprint.c \
-       ft_toupper.c ft_tolower.c ft_atoi.c ft_itoa.c \
-       ft_putchar_fd.c ft_putstr_fd.c ft_putendl_fd.c ft_putnbr_fd.c \
-       ft_bzero.c ft_memset.c ft_memcpy.c ft_memmove.c ft_memchr.c ft_calloc.c \
-       ft_split.c ft_striteri.c ft_strlcpy.c ft_strncmp.c ft_strtrim.c \
-       ft_strchr.c ft_strjoin.c ft_strlen.c ft_strnstr.c ft_substr.c \
-       ft_strdup.c ft_strlcat.c ft_strrchr.c \
-       get_next_line.c ft_putstr.c \
-       ft_printf.c ft_printf2.c ft_printf3.c \
-       ft_str_isnumeric.c
+OBJ=$(SRC:.c=.o)
 
-
-OBJ = $(addprefix $(OBJ_DIR), $(SRCS:.c=.o))
-    
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
-AR = ar -rcs
-INC_H = -I $(INC_DIR)
+MAKE = make
+CFLAG=-Wall -Wextra -Werror -g3
 
+SRCS_DIR = ./src/
+OBJ_DIR = ./objects/
+INC_DIR = ./includes/
+PARSE_DIR = $(SRCS_DIR)parsing/
+OPE_DIR = $(SRCS_DIR)operations/
+LIBFT_DIR = ./libft/
+MLX_DIR = ./minilibx-linux 
+
+SRCS=main.c error_free.c flood_fill.c ft_check_error.c ft_check_error2.c ft_move_player.c ft_init_map.c ft_display.c
+
+OBJ = $(addprefix $(OBJ_DIR), $(SRCS:.c=.o)) 
+
+#INC_H = -I $(INC_DIR) -I $(LIBFT_DIR)/includes/
+
+INC_H = -I $(INC_DIR) -I $(LIBFT_DIR)/includes/ -I $(MLX_DIR)
 
 all: $(NAME)
-
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-$(NAME) : $(OBJ)
-	@$(AR) $(NAME) $(OBJ)
+$(NAME): $(OBJ)
+	@$(MAKE) -C $(LIBFT_DIR)
+	@$(MAKE) -C $(MLX_DIR)
+#	@$(CC) $(CFLAGS) $(INC_H) $(OBJ) -L$(LIBFT_DIR) -lft -o $(NAME)
+	@$(CC) $(CFLAGS) $(INC_H) $(OBJ) -L$(LIBFT_DIR) -lft -L$(MLX_DIR) -lmlx -lXext -lX11 -o $(NAME)
+#	@$(CC) $(CFLAGS) $(INC_H) $(OBJ) -L$(LIBFT_DIR) -lft -L$(MLX_DIR) -lmlx -framework OpenGL -framework AppKit -o $(NAME) pour MAC
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	@$(CC) $(CFLAGS) -I $(INC_DIR) -c $< -o $@
+$(OBJ_DIR)%.o: $(SRCS_DIR)%.c | $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INC_H) -c -o $@ $<
+
+$(OBJ_DIR)%.o: $(PARSE_DIR)%.c | $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INC_H) -c -o $@ $<
+
+$(OBJ_DIR)%.o: $(OPE_DIR)%.c | $(OBJ_DIR)
+	@$(CC) $(CFLAGS) $(INC_H) -c -o $@ $<
 
 clean:
-	@rm -rf $(OBJ_DIR)
+	rm -rf $(OBJ_DIR)
+	@$(MAKE) -C $(LIBFT_DIR) clean
+	@$(MAKE) -C $(MLX_DIR) clean
 
 fclean: clean
-	@rm -rf $(NAME)
+	rm -rf $(NAME)
+	@$(MAKE) -C $(LIBFT_DIR) fclean
 
 re: fclean all
 
-.PHONY: clean fclean all re
+
+
+.PHONY: all clean fclean re
